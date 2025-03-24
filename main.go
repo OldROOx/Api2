@@ -49,7 +49,11 @@ func main() {
 	// Initialize controller
 	controller := controllers.NewSensorController(service)
 
-	// routes with CORS enabled
+	// New routes for ESP32 integration
+	http.HandleFunc("/api/registro", enableCORS(controller.HandleRegistration))
+	http.HandleFunc("/api/datos", enableCORS(controller.HandleSensorData))
+
+	// Existing routes with CORS enabled
 	http.HandleFunc("/api/ky026", enableCORS(controller.HandleKY026))
 	http.HandleFunc("/api/mq2", enableCORS(controller.HandleMQ2))
 	http.HandleFunc("/api/mq135", enableCORS(controller.HandleMQ135))
@@ -60,4 +64,8 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("API is running"))
+	})
 }
